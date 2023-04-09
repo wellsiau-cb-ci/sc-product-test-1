@@ -1,0 +1,14 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Helm chart for Nginx using CloudFormation Registry
+Parameters:
+  EKSCluster:
+    Type: String
+    Description: Enter the EKS cluster name
+    Default: "my-cluster"
+Resources:
+  Nginx:
+    Type: AWSQS::Kubernetes::Helm
+    Properties:
+      Repository: https://charts.bitnami.com/bitnami
+      Chart: bitnami/nginx
+      ClusterID: !Ref EKSCluster

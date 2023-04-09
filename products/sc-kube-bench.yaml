@@ -1,0 +1,30 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: Service Catalog Product - kube-bench
+Parameters:
+  KubeBenchUrl:
+    Type: String
+    Default: ''
+    Description: Enter the S3 URL for kube-bench-registry.yaml
+Resources:
+  SCKubeBench:
+    Type: AWS::ServiceCatalog::CloudFormationProduct
+    Properties: 
+      Description: kube-bench k8s manifest
+      Distributor: Workshop Studio
+      Name: kube-bench
+      Owner: Workshop Studio
+      ProvisioningArtifactParameters: 
+        - Description: kube-bench
+          Info: 
+            LoadTemplateFromURL: !Ref KubeBenchUrl
+          Name: v1
+      Tags: 
+        - Key: Environment
+          Value: Workshop Studio
+Outputs:
+   SCKubeBench:
+    Description: Service Catalog Product kube-bench
+    Value: !Ref SCKubeBench
+    Export:
+      Name: 
+        'Fn::Sub': '${AWS::StackName}-SCKubeBench'

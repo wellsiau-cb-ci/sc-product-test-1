@@ -1,0 +1,30 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: Service Catalog Product - Demo App IRSA
+Parameters:
+  DemoAppUrl:
+    Type: String
+    Default: ''
+    Description: Enter the S3 URL for demo-app-irsa.yaml
+Resources:
+  SCDemoApp:
+    Type: AWS::ServiceCatalog::CloudFormationProduct
+    Properties: 
+      Description: Demo App IRSA
+      Distributor: Workshop Studio
+      Name: Demo App
+      Owner: Workshop Studio
+      ProvisioningArtifactParameters: 
+        - Description: Demo App IRSA
+          Info: 
+            LoadTemplateFromURL: !Ref DemoAppUrl
+          Name: v1
+      Tags: 
+        - Key: Environment
+          Value: Workshop Studio
+Outputs:
+   SCDemoApp:
+    Description: Service Catalog Product Demo App
+    Value: !Ref SCDemoApp
+    Export:
+      Name: 
+        'Fn::Sub': '${AWS::StackName}-SCDemoApp'
