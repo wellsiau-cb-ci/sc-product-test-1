@@ -1,0 +1,124 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: Service Catalog Portfolio
+Parameters:
+  PortfolioName:
+    Type: String
+    Default: Kubernetes_Portfolio
+    Description: Enter the portfolio name
+  PortfolioDesc:
+    Type: String
+    Default: Collection of demo service catalog products
+    Description: Enter the portfolio description
+  PortfolioProvider:
+    Type: String
+    Default: Workshop Studio
+    Description: Enter the portfolio provider
+  NginxStackName:
+    Type: String
+    Default: sc-helm-nginx
+    Description: Enter the Nginx service catalog stack name
+  KubeBenchStackName:
+    Type: String
+    Default: sc-kube-bench
+    Description: Enter the kube-bench service catalog stack name
+  DemoAppStackName:
+    Type: String
+    Default: sc-demo-app-irsa
+    Description: Enter the kube-bench service catalog stack name
+Resources:
+################## PORTFOLIO #################
+  ServiceCatalogPortfolio:
+    Type: AWS::ServiceCatalog::Portfolio
+    Properties: 
+      Description: !Ref PortfolioDesc
+      DisplayName: !Ref PortfolioName
+      ProviderName: !Ref PortfolioProvider
+      Tags: 
+        - Key: Environment
+          Value: Workshop Studio
+
+################## PRODUCT ASSOCIATIONS #################
+  NginxAssociation:
+    Type: AWS::ServiceCatalog::PortfolioProductAssociation
+    Properties: 
+      PortfolioId: !Ref ServiceCatalogPortfolio
+      ProductId: 
+        Fn::ImportValue:
+          !Sub "${NginxStackName}-SCHelmNginx"
+
+  KubeBenchAssociation:
+    Type: AWS::ServiceCatalog::PortfolioProductAssociation
+    Properties: 
+      PortfolioId: !Ref ServiceCatalogPortfolio
+      ProductId: 
+        Fn::ImportValue:
+          !Sub "${KubeBenchStackName}-SCKubeBench"
+
+  DemoAppAssociation:
+    Type: AWS::ServiceCatalog::PortfolioProductAssociation
+    Properties: 
+      PortfolioId: !Ref ServiceCatalogPortfolio
+      ProductId: 
+        Fn::ImportValue:
+          !Sub "${DemoAppStackName}-SCDemoApp"
+
+################## PERMISSIONS AND ROLES #################
+  SCLaunchRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: SELaunchRole
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action: sts:AssumeRole
+            Effect: Allow
+            Principal:
+              Service: servicecatalog.amazonaws.com
+        Version: "2012-10-17"
+      ManagedPolicyArns:
+        - !Join ['', ['arn:', !Ref 'AWS::Partition', ':iam::aws:policy/AdministratorAccess']]
+
+################## LAUNCH ROLE CONSTRAINT #################
+  SCNginxLaunchRoleConst:
+    Type: AWS::ServiceCatalog::LaunchRoleConstraint
+    Properties:
+      Description: Service Catalog uses this role to launch the product
+      PortfolioId: !Ref ServiceCatalogPortfolio
+      ProductId:
+        Fn::ImportValue:
+          !Sub "${NginxStackName}-SCHelmNginx"
+      RoleArn: !GetAtt SCLaunchRole.Arn
+    DependsOn:
+      - NginxAssociation
+
+  SCKubeBenchLaunchRoleConst:
+    Type: AWS::ServiceCatalog::LaunchRoleConstraint
+    Properties:
+      Description: Service Catalog uses this role to launch the product
+      PortfolioId: !Ref ServiceCatalogPortfolio
+      ProductId:
+        Fn::ImportValue:
+          !Sub "${KubeBenchStackName}-SCKubeBench"
+      RoleArn: !GetAtt SCLaunchRole.Arn
+    DependsOn:
+      - KubeBenchAssociation
+
+  SCDemoAppLaunchRoleConst:
+    Type: AWS::ServiceCatalog::LaunchRoleConstraint
+    Properties:
+      Description: Service Catalog uses this role to launch the product
+      PortfolioId: !Ref ServiceCatalogPortfolio
+      ProductId:
+        Fn::ImportValue:
+          !Sub "${DemoAppStackName}-SCDemoApp"
+      RoleArn: !GetAtt SCLaunchRole.Arn
+    DependsOn:
+      - DemoAppAssociation
+
+################## GROUP USER & ROLE ASSOCIATION #################
+  TeamRoleAssociation:
+    Type: AWS::ServiceCatalog::PortfolioPrincipalAssociation
+    Properties:
+      PortfolioId: !Ref ServiceCatalogPortfolio
+      PrincipalARN:
+        !Join ['',['arn:aws:iam::',!Ref 'AWS::AccountId',':role/WSParticipantRole']]
+      PrincipalType: IAM
