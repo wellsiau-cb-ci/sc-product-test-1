@@ -1,0 +1,22 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Resources:
+  EKSCluster:
+    Type: AWS::EKS::Cluster
+    Properties:
+      Name: Prod
+      Version: "1.24"
+      RoleArn: "arn:aws:iam::413260580756:role/eks-quickstart-ControlPlane"
+      ResourcesVpcConfig:
+        SecurityGroupIds:
+          - sg-0b2d4f1b7acc1eefc
+        SubnetIds:
+          - subnet-051fdf93f10caba00
+          - subnet-0d194041575274a0c
+        EndpointPublicAccess: false
+        EndpointPrivateAccess: true
+        PublicAccessCidrs: [ "1.1.1.2/32" ]
+      Logging:
+        ClusterLogging:
+          EnabledTypes:
+            - Type: api
+            - Type: audit
