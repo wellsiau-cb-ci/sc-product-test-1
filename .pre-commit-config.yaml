@@ -1,12 +1,21 @@
 repos:
 -   repo: local
     hooks:
+    -   id: cfn-lint
+        name: AWS CloudFormation Lint
+        description: Validate template against CloudFormation Resource Specification
+        entry: cfn-lint templates/*.yaml -i W
+        language: python
+        files: \.(json|yaml|yml|templates\.json|template)$
+        pass_filenames: false
+        
     -   id: cfn-guard
         name: AWS CloudFormation Guard
-        description: Validate code against your Guard rules
-        entry: cfn-guard validate -r ../cfn-guard -d templates
+        description: Validate template against your Guard rules
+        entry: cfn-guard validate -r cfn-guard -d templates
         language: rust
         additional_dependencies:
           - cli:cfn-guard
         files: \.(json|yaml|yml|template\.json|template)$
         pass_filenames: false
+        
