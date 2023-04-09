@@ -1,0 +1,31 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: 'Deploying simple EKS cluster' 
+Parameters:
+  RemoteAccessCIDR:
+    Description: 'Enter your IP address followed by /32. Example: 1.2.3.4/32'
+    Type: String
+    Default: "192.168.1.1/32"
+  SubnetIds:
+    Description: Select the subnets for the EKS cluster 
+    Type: List<AWS::EC2::Subnet::Id>
+  SecurityGroupIds:
+    Description: Select the security groups for the EKS cluster
+    Type: List<AWS::EC2::SecurityGroup::Id>
+Resources:
+  EKSCluster:
+    Type: AWS::EKS::Cluster
+    Properties:
+      Name: Prod
+      Version: "1.23"
+      RoleArn: "arn:aws:iam::413260580756:role/eks-quickstart-ControlPlane"
+      ResourcesVpcConfig:
+        SecurityGroupIds: !Ref SecurityGroupIds
+        SubnetIds: !Ref SubnetIds
+        EndpointPublicAccess: true
+        EndpointPrivateAccess: true
+        PublicAccessCidrs: [ !Ref RemoteAccessCIDR ]
+      Logging:
+        ClusterLogging:
+          EnabledTypes:
+            - Type: api
+            - Type: audit

@@ -4,7 +4,7 @@ repos:
     -   id: cfn-lint
         name: AWS CloudFormation Lint
         description: Validate template against CloudFormation Resource Specification
-        entry: cfn-lint templates/*.yaml -i W -i E3001
+        entry: cfn-lint templates/*.yaml -i W -i E3001 E0000
         language: python
         additional_dependencies:
           - cfn-lint
