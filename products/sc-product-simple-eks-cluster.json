@@ -1,0 +1,19 @@
+{
+    "AcceptLanguage": "en",
+    "Name": "Simple EKS cluster",
+    "Owner": "Workshop Studio",
+    "Description": "Simple EKS cluster from Git repository sync",
+    "Distributor": "Workshop Studio",
+    "ProductType": "CLOUD_FORMATION_TEMPLATE",
+    "SourceConnection": {
+        "ConnectionParameters": {
+            "CodeStar" : {
+                "ConnectionArn": "arn:aws:codestar-connections:us-east-1:413260580756:connection/a47609d0-3af6-4ada-968a-dba92bea486f",
+                "Repository": "fss18/sc-product-test-1",
+                "Branch": "main",
+                "ArtifactPath": "templates/simple-eks-cluster.yaml"
+            }
+        },
+        "Type": "CODESTAR"
+    }
+}
