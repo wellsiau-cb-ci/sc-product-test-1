@@ -30,12 +30,12 @@ Resources:
               {
                 "Effect": "Allow",
                 "Principal": {
-                  "Federated": "arn:aws:iam:::oidc-provider/"
+                  "Federated": "arn:aws:iam::${AWS::AccountId}:oidc-provider/${Issuer}"
                 },
                 "Action": "sts:AssumeRoleWithWebIdentity",
                 "Condition": {
                   "StringEquals": {
-                    ":sub": "system:serviceaccount::"
+                    "${Issuer}:sub": "system:serviceaccount:${Namespace}:${ServiceAccount}"
                   }
                 }
               }
@@ -54,7 +54,7 @@ Resources:
         apiVersion: v1
         kind: Namespace
         metadata:
-          name: 
+          name: ${Namespace}
 
   DemoAppServiceAccount:
     Type: AWSQS::Kubernetes::Resource
@@ -67,9 +67,9 @@ Resources:
           apiVersion: v1
           kind: ServiceAccount
           metadata:
-            name: 
+            name: ${ServiceAccount}
             annotations:
-              eks.amazonaws.com/role-arn: 
+              eks.amazonaws.com/role-arn: ${Role}
         - Role: !GetAtt DemoAppRole.Arn
 
   DemoAppPodS3:
@@ -89,7 +89,7 @@ Resources:
               labels:
                 app: demo-app-iam-test-s3
             spec:
-              serviceAccountName: 
+              serviceAccountName: ${ServiceAccount}
               containers:
               - name: eks-iam-test
                 image: amazon/aws-cli:latest
