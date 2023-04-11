@@ -1,30 +1,42 @@
 AWSTemplateFormatVersion: "2010-09-09"
 Description: Service Catalog Product - Demo App IRSA
 Parameters:
-  DemoAppUrl:
+  CodeStarArn:
     Type: String
-    Default: ''
-    Description: Enter the S3 URL for demo-app-irsa.yaml
+    Description: The CodeStar ARN, which is the connection between AWS Service Catalog and the external repository.
+  Repository:
+    Type: String
+    Description: The specific repository where the product’s artifact-to-be-synced resides, formatted as "Account/Repo."
+  Branch:
+    Type: String
+    Description: The specific branch where the artifact resides. 
+  ArtifactPath:
+    Type: String
+    Description: The absolute path where the artifact resides within the repo and branch, formatted as "folder/file.json." 
 Resources:
-  SCDemoApp:
+  ProductDemoApp:
     Type: AWS::ServiceCatalog::CloudFormationProduct
     Properties: 
       Description: Demo App IRSA
       Distributor: Workshop Studio
       Name: Demo App
       Owner: Workshop Studio
-      ProvisioningArtifactParameters: 
-        - Description: Demo App IRSA
-          Info: 
-            LoadTemplateFromURL: !Ref DemoAppUrl
-          Name: v1
+      ProductType: CLOUD_FORMATION_TEMPLATE
+      SourceConnection:
+        ConnectionParameters:
+          CodeStar:
+            ArtifactPath: !Ref ArtifactPath
+            Branch: !Ref Branch
+            ConnectionArn: !Ref CodeStarArn
+            Repository: !Ref Repository
+        Type: CODESTAR
       Tags: 
         - Key: Environment
           Value: Workshop Studio
 Outputs:
    SCDemoApp:
-    Description: Service Catalog Product Demo App
-    Value: !Ref SCDemoApp
+    Description: Service Catalog Product - Demo App
+    Value: !Ref ProductDemoApp
     Export:
       Name: 
-        'Fn::Sub': '${AWS::StackName}-SCDemoApp'
+        'Fn::Sub': '${AWS::StackName}-ProductPA'
