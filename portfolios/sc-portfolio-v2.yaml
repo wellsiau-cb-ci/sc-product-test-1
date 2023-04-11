@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: "2010-09-09"
-Description: Kubernetes Resources Portfolio
+Description: Builder Session - Service Catalog Portfolio
 Parameters:
   PortfolioName:
     Type: String
@@ -13,6 +13,10 @@ Parameters:
     Type: String
     Default: Workshop Studio
     Description: Enter the portfolio provider
+  EKSStackName:
+    Type: String
+    Default: sc-simple-eks
+    Description: Enter the EKS cluster service catalog stack name
   NginxStackName:
     Type: String
     Default: sc-helm-nginx
@@ -30,13 +34,21 @@ Resources:
           Value: Workshop Studio
 
 ################## PRODUCT ASSOCIATIONS #################
+  EKSAssociation:
+    Type: AWS::ServiceCatalog::PortfolioProductAssociation
+    Properties: 
+      PortfolioId: !Ref ServiceCatalogPortfolio
+      ProductId: 
+        Fn::ImportValue:
+          !Sub "${EKSStackName}-ProductPA"
+          
   NginxAssociation:
     Type: AWS::ServiceCatalog::PortfolioProductAssociation
     Properties: 
       PortfolioId: !Ref ServiceCatalogPortfolio
       ProductId: 
         Fn::ImportValue:
-          !Sub "${NginxStackName}-SCHelmNginx"
+          !Sub "${NginxStackName}-ProductPA"
 
 ################## PERMISSIONS AND ROLES #################
   SCLaunchRole:
@@ -54,6 +66,18 @@ Resources:
         - !Join ['', ['arn:', !Ref 'AWS::Partition', ':iam::aws:policy/AdministratorAccess']]
 
 ################## LAUNCH ROLE CONSTRAINT #################
+  SCEKSLaunchRoleConst:
+    Type: AWS::ServiceCatalog::LaunchRoleConstraint
+    Properties:
+      Description: Service Catalog uses this role to launch the product
+      PortfolioId: !Ref ServiceCatalogPortfolio
+      ProductId:
+        Fn::ImportValue:
+          !Sub "${EKSStackName}-ProductPA"
+      RoleArn: !GetAtt SCLaunchRole.Arn
+    DependsOn:
+      - EKSAssociation
+  
   SCNginxLaunchRoleConst:
     Type: AWS::ServiceCatalog::LaunchRoleConstraint
     Properties:
@@ -61,7 +85,7 @@ Resources:
       PortfolioId: !Ref ServiceCatalogPortfolio
       ProductId:
         Fn::ImportValue:
-          !Sub "${NginxStackName}-SCHelmNginx"
+          !Sub "${NginxStackName}-ProductPA"
       RoleArn: !GetAtt SCLaunchRole.Arn
     DependsOn:
       - NginxAssociation

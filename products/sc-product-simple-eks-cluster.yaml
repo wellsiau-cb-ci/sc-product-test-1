@@ -1,5 +1,5 @@
-AWSTemplateFormatVersion: '2010-09-09'
-Description: 'Service Catalog Product - Simple EKS'
+AWSTemplateFormatVersion: "2010-09-09"
+Description: Service Catalog Product - Simple EKS
 Parameters:
   CodeStarArn:
     Type: String

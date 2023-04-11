@@ -54,7 +54,7 @@ Resources:
         - !Join ['', ['arn:', !Ref 'AWS::Partition', ':iam::aws:policy/AdministratorAccess']]
 
 ################## LAUNCH ROLE CONSTRAINT #################
-  SCNginxLaunchRoleConst:
+  SCEKSLaunchRoleConst:
     Type: AWS::ServiceCatalog::LaunchRoleConstraint
     Properties:
       Description: Service Catalog uses this role to launch the product
