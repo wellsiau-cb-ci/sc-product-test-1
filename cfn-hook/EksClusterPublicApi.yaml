@@ -28,5 +28,5 @@ Resources:
   EksClusterPublicApiTypeConfig:
     Type: AWS::CloudFormation::HookTypeConfig
     Properties:
-      TypeArn: !Sub "arn:${AWS::Partition}:cloudformation:${AWS::Region}:${AWS::AccountId}:type/hook/AWSSamples-EksClusterPublicApi-Hook"
+      TypeArn: !Ref EksClusterPublicApi
       Configuration: '{"CloudFormationConfiguration":{"HookConfiguration":{"TargetStacks":"ALL","FailureMode":"FAIL","Properties":{}}}}'
