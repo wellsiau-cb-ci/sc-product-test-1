@@ -1,0 +1,98 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: Sample app with IRSA
+Parameters:
+  OIDCIssuer:
+    Type: String
+    Default: ''
+    Description: OIDC Issuer from the EKS stack (without https://)
+  EKSCluster:
+    Type: String
+    Default: "my-cluster"
+    Description: Enter the EKS cluster name
+  Namespace:
+    Type: String
+    Default: "demo"
+    Description: Namespace for the demo app
+  ServiceAccount:
+    Type: String
+    Default: "demo-service-account"
+    Description: Name of the Kubernetes Service Account
+Resources:
+  DemoAppRole:
+    Type: AWS::IAM::Role
+    Properties:
+      Path: '/'
+      AssumeRolePolicyDocument: !Sub 
+        - |
+          {
+            "Version": "2012-10-17",
+            "Statement": [
+              {
+                "Effect": "Allow",
+                "Principal": {
+                  "Federated": "arn:aws:iam:::oidc-provider/"
+                },
+                "Action": "sts:AssumeRoleWithWebIdentity",
+                "Condition": {
+                  "StringEquals": {
+                    ":sub": "system:serviceaccount::"
+                  }
+                }
+              }
+            ]
+          }
+        - Issuer: !Ref OIDCIssuer
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess
+
+  DemoAppNamespace:
+    Type: AWSQS::Kubernetes::Resource
+    Properties:
+      ClusterName: !Ref EKSCluster
+      Namespace: 'default'
+      Manifest: !Sub |
+        apiVersion: v1
+        kind: Namespace
+        metadata:
+          name: 
+
+  DemoAppServiceAccount:
+    Type: AWSQS::Kubernetes::Resource
+    DependsOn: DemoAppNamespace
+    Properties:
+      ClusterName: !Ref EKSCluster
+      Namespace: !Ref Namespace
+      Manifest: !Sub 
+        - |
+          apiVersion: v1
+          kind: ServiceAccount
+          metadata:
+            name: 
+            annotations:
+              eks.amazonaws.com/role-arn: 
+        - Role: !GetAtt DemoAppRole.Arn
+
+  DemoAppPodS3:
+    Type: AWSQS::Kubernetes::Resource
+    DependsOn: DemoAppServiceAccount
+    Properties:
+      ClusterName: !Ref EKSCluster
+      Namespace: !Ref Namespace
+      Manifest: !Sub |
+        apiVersion: batch/v1
+        kind: Job
+        metadata:
+          name: demo-app-iam-test-s3
+        spec:
+          template:
+            metadata:
+              labels:
+                app: demo-app-iam-test-s3
+            spec:
+              serviceAccountName: 
+              containers:
+              - name: eks-iam-test
+                image: amazon/aws-cli:latest
+                args: ["s3", "ls"]
+              restartPolicy: Never
+          backoffLimit: 0
