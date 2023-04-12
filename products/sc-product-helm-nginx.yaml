@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: "2010-09-09"
-Description: Service Catalog Product - Demo App IRSA
+Description: Service Catalog Product - Nginx Helm Chart
 Parameters:
   CodeStarArn:
     Type: String
@@ -14,12 +14,12 @@ Parameters:
     Type: String
     Description: The absolute path where the artifact resides within the repo and branch, formatted as "folder/file.json." 
 Resources:
-  ProductDemoApp:
+  ProductHelmNginx:
     Type: AWS::ServiceCatalog::CloudFormationProduct
     Properties: 
-      Description: Demo App IRSA
+      Description: Nginx Helm Chart
       Distributor: Workshop Studio
-      Name: Demo App
+      Name: Nginx
       Owner: Workshop Studio
       ProductType: CLOUD_FORMATION_TEMPLATE
       SourceConnection:
@@ -34,9 +34,9 @@ Resources:
         - Key: Environment
           Value: Workshop Studio
 Outputs:
-   SCDemoApp:
-    Description: Service Catalog Product - Demo App
-    Value: !Ref ProductDemoApp
+   ProductPA:
+    Description: Service Catalog Product - Nginx helm chart
+    Value: !Ref ProductHelmNginx
     Export:
       Name: 
         'Fn::Sub': '${AWS::StackName}-ProductPA'

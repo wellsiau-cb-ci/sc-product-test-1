@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: "2010-09-09"
-Description: Service Catalog Product - Demo App IRSA
+Description: Service Catalog Product - Simple EKS
 Parameters:
   CodeStarArn:
     Type: String
@@ -14,12 +14,12 @@ Parameters:
     Type: String
     Description: The absolute path where the artifact resides within the repo and branch, formatted as "folder/file.json." 
 Resources:
-  ProductDemoApp:
+  ProductSimpleEKS:
     Type: AWS::ServiceCatalog::CloudFormationProduct
     Properties: 
-      Description: Demo App IRSA
+      Description: Simple EKS cluster
       Distributor: Workshop Studio
-      Name: Demo App
+      Name: Simple EKS cluster
       Owner: Workshop Studio
       ProductType: CLOUD_FORMATION_TEMPLATE
       SourceConnection:
@@ -34,9 +34,9 @@ Resources:
         - Key: Environment
           Value: Workshop Studio
 Outputs:
-   SCDemoApp:
-    Description: Service Catalog Product - Demo App
-    Value: !Ref ProductDemoApp
+   ProductPA:
+    Description: Service Catalog Product - Simple EKS
+    Value: !Ref ProductSimpleEKS
     Export:
       Name: 
         'Fn::Sub': '${AWS::StackName}-ProductPA'

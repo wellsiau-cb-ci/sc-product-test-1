@@ -13,14 +13,18 @@ Parameters:
     Type: String
     Default: Workshop Studio
     Description: Enter the portfolio provider
+  EKSStackName:
+    Type: String
+    Default: sc-simple-eks
+    Description: Enter the EKS cluster service catalog stack name
   NginxStackName:
     Type: String
     Default: sc-helm-nginx
     Description: Enter the Nginx service catalog stack name
-  KubeBenchStackName:
+  DemoAppStackName:
     Type: String
-    Default: sc-kube-bench
-    Description: Enter the kube-bench service catalog stack name
+    Default: sc-demo-app-irsa
+    Description: Enter the demo app IRSA service catalog stack name
 Resources:
 ################## PORTFOLIO #################
   ServiceCatalogPortfolio:
@@ -34,21 +38,29 @@ Resources:
           Value: Workshop Studio
 
 ################## PRODUCT ASSOCIATIONS #################
+  EKSAssociation:
+    Type: AWS::ServiceCatalog::PortfolioProductAssociation
+    Properties: 
+      PortfolioId: !Ref ServiceCatalogPortfolio
+      ProductId: 
+        Fn::ImportValue:
+          !Sub "${EKSStackName}-ProductPA"
+          
   NginxAssociation:
     Type: AWS::ServiceCatalog::PortfolioProductAssociation
     Properties: 
       PortfolioId: !Ref ServiceCatalogPortfolio
       ProductId: 
         Fn::ImportValue:
-          !Sub "${NginxStackName}-SCHelmNginx"
+          !Sub "${NginxStackName}-ProductPA"
 
-  KubeBenchAssociation:
+  DemoAppAssociation:
     Type: AWS::ServiceCatalog::PortfolioProductAssociation
     Properties: 
       PortfolioId: !Ref ServiceCatalogPortfolio
       ProductId: 
         Fn::ImportValue:
-          !Sub "${KubeBenchStackName}-SCKubeBench"
+          !Sub "${DemoAppStackName}-ProductPA"
 
 ################## PERMISSIONS AND ROLES #################
   SCLaunchRole:
@@ -66,6 +78,18 @@ Resources:
         - !Join ['', ['arn:', !Ref 'AWS::Partition', ':iam::aws:policy/AdministratorAccess']]
 
 ################## LAUNCH ROLE CONSTRAINT #################
+  SCEKSLaunchRoleConst:
+    Type: AWS::ServiceCatalog::LaunchRoleConstraint
+    Properties:
+      Description: Service Catalog uses this role to launch the product
+      PortfolioId: !Ref ServiceCatalogPortfolio
+      ProductId:
+        Fn::ImportValue:
+          !Sub "${EKSStackName}-ProductPA"
+      RoleArn: !GetAtt SCLaunchRole.Arn
+    DependsOn:
+      - EKSAssociation
+      
   SCNginxLaunchRoleConst:
     Type: AWS::ServiceCatalog::LaunchRoleConstraint
     Properties:
@@ -73,22 +97,22 @@ Resources:
       PortfolioId: !Ref ServiceCatalogPortfolio
       ProductId:
         Fn::ImportValue:
-          !Sub "${NginxStackName}-SCHelmNginx"
+          !Sub "${NginxStackName}-ProductPA"
       RoleArn: !GetAtt SCLaunchRole.Arn
     DependsOn:
       - NginxAssociation
 
-  SCKubeBenchLaunchRoleConst:
+  SCDemoAppLaunchRoleConst:
     Type: AWS::ServiceCatalog::LaunchRoleConstraint
     Properties:
       Description: Service Catalog uses this role to launch the product
       PortfolioId: !Ref ServiceCatalogPortfolio
       ProductId:
         Fn::ImportValue:
-          !Sub "${KubeBenchStackName}-SCKubeBench"
+          !Sub "${DemoAppStackName}-ProductPA"
       RoleArn: !GetAtt SCLaunchRole.Arn
     DependsOn:
-      - KubeBenchAssociation
+      - DemoAppAssociation
 
 ################## GROUP USER & ROLE ASSOCIATION #################
   TeamRoleAssociation:

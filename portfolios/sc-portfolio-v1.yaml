@@ -17,10 +17,6 @@ Parameters:
     Type: String
     Default: sc-simple-eks
     Description: Enter the EKS cluster service catalog stack name
-  NginxStackName:
-    Type: String
-    Default: sc-helm-nginx
-    Description: Enter the Nginx service catalog stack name
 Resources:
 ################## PORTFOLIO #################
   ServiceCatalogPortfolio:
@@ -41,14 +37,6 @@ Resources:
       ProductId: 
         Fn::ImportValue:
           !Sub "${EKSStackName}-ProductPA"
-          
-  NginxAssociation:
-    Type: AWS::ServiceCatalog::PortfolioProductAssociation
-    Properties: 
-      PortfolioId: !Ref ServiceCatalogPortfolio
-      ProductId: 
-        Fn::ImportValue:
-          !Sub "${NginxStackName}-ProductPA"
 
 ################## PERMISSIONS AND ROLES #################
   SCLaunchRole:
@@ -77,18 +65,6 @@ Resources:
       RoleArn: !GetAtt SCLaunchRole.Arn
     DependsOn:
       - EKSAssociation
-  
-  SCNginxLaunchRoleConst:
-    Type: AWS::ServiceCatalog::LaunchRoleConstraint
-    Properties:
-      Description: Service Catalog uses this role to launch the product
-      PortfolioId: !Ref ServiceCatalogPortfolio
-      ProductId:
-        Fn::ImportValue:
-          !Sub "${NginxStackName}-ProductPA"
-      RoleArn: !GetAtt SCLaunchRole.Arn
-    DependsOn:
-      - NginxAssociation
 
 ################## GROUP USER & ROLE ASSOCIATION #################
   TeamRoleAssociation:
