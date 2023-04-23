@@ -1,17 +1,16 @@
 AWSTemplateFormatVersion: "2010-09-09"
-Description: Builder Session - EKS Product Association
+Description: Builder Session - Service Catalog Product Association
 Parameters:
   PortfolioStackName:
     Type: String
     Default: sc-portfolio
     Description: Enter the Service Catalog Portfolio stack name
-  EKSStackName:
+  ProductStackName:
     Type: String
-    Default: sc-simple-eks
-    Description: Enter the EKS cluster service catalog stack name
+    Description: Enter the Service Catalog Product stack name to be associated with the portfolio
 Resources:
 ################## PRODUCT ASSOCIATIONS #################
-  EKSAssociation:
+  ProductAssociation:
     Type: AWS::ServiceCatalog::PortfolioProductAssociation
     Properties: 
       PortfolioId:
@@ -19,10 +18,10 @@ Resources:
           !Sub "${PortfolioStackName}-PortfolioId"
       ProductId: 
         Fn::ImportValue:
-          !Sub "${EKSStackName}-ProductPA"
+          !Sub "${ProductStackName}-ProductPA"
 
 ################## LAUNCH ROLE CONSTRAINT #################
-  SCEKSLaunchRoleConst:
+  LaunchRoleConst:
     Type: AWS::ServiceCatalog::LaunchRoleConstraint
     Properties:
       Description: Service Catalog uses this role to launch the product
@@ -31,9 +30,9 @@ Resources:
           !Sub "${PortfolioStackName}-PortfolioId"
       ProductId:
         Fn::ImportValue:
-          !Sub "${EKSStackName}-ProductPA"
+          !Sub "${ProductStackName}-ProductPA"
       RoleArn: 
         Fn::ImportValue:
           !Sub "${PortfolioStackName}-LaunchRole"
     DependsOn:
-      - EKSAssociation
+      - ProductAssociation

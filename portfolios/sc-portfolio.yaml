@@ -50,7 +50,7 @@ Resources:
       PrincipalType: IAM
 
 Outputs:
-   PortfolioId:
+  PortfolioId:
     Description: Service Catalog Portfolio Id
     Value: !Ref ServiceCatalogPortfolio
     Export:
