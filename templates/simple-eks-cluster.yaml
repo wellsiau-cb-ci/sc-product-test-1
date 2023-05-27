@@ -11,8 +11,6 @@ Resources:
   EKSCluster:
     Type: AWS::EKS::Cluster
     Properties:
-      Name: Prod
-      Version: "1.23"
       RoleArn: !Sub "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/eks-quickstart-ControlPlane"
       ResourcesVpcConfig:
         SecurityGroupIds: !Ref SecurityGroupIds
